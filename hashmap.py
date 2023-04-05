@@ -10,6 +10,14 @@ class HashMap:
         self.num_elements = 0
         self.hashMap = [[] for _ in range(size)]
 
+    def __contains__(self, key):
+        for i in range(self.size):
+            if len(self.hashMap[i] == 0) or self.hashMap[i][0][0] != key:
+                continue
+            else:
+                return True
+        return False
+
     # def put(self, key, value):
     #     hash_value = hash(key) % self.capacity
     #     while self.slots[hash_value] is not None and self.slots[hash_value] != key:
@@ -18,6 +26,8 @@ class HashMap:
     #     self.data[hash_value] = value
 
     def put(self, key, value):
+        print(self.num_elements)
+        print(self.size)
         if self.num_elements >= self.size * self.load_factor:
             self._rehash()
 
@@ -30,12 +40,13 @@ class HashMap:
             self.hashMap[index].append((key, value))
             self.num_elements += 1
         else:
+            old_val = self.hashMap[index][0][1]
             self.hashMap[index].clear()
-            self.hashMap[index].append((key, value))
+            self.hashMap[index].append((key, old_val + value))
 
     def __repr__(self):
         # return [i for i in self.hashMap].join(", ")
-        return ", ".join([", ".join(i) for i in self.hashMap])
+        return str(self.hashMap)
 
     # def get(self, key):
     #     hash_value = hash(key) % self.capacity
@@ -47,7 +58,6 @@ class HashMap:
 
     def get(self, key):
         index = hash(key) % self.size
-        start_index = index
         while len(self.hashMap[index]) != 0:
             if self.hashMap[index][0][0] == key:
                 return self.hashMap[index][0][1]
@@ -80,14 +90,15 @@ class HashMap:
 
     def _rehash(self):
         tempSize = self.size
-        self.size += 2
+        self.size *= 2
         refHashMap = self.hashMap.copy()
         self.hashMap = [[] for _ in range(self.size)]
+        self.num_elements = 0
         for i in range(tempSize):
             if len(refHashMap[i]) == 0:
                 continue
             keyValuePair = refHashMap[i][0]
-            self.insert(keyValuePair[0], keyValuePair[1])
+            self.put(keyValuePair[0], keyValuePair[1])
 
     # def size(self):
     #     count = 0
@@ -105,3 +116,16 @@ class HashMap:
 
 if __name__ == "__main__":
     map1 = HashMap()
+
+    map1.put(12, 12)
+    print(map1)
+    map1.put(5, 12)
+    print(map1)
+    map1.put(4, 12)
+    print(map1)
+    map1.remove(12)
+    print(map1)
+    for i in range(16):
+        map1.put(i, 0)
+        print(map1)
+    print(map1)

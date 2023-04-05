@@ -1,4 +1,5 @@
 import hashlib
+from hashmap import HashMap
 
 
 class Transaction:
@@ -11,20 +12,24 @@ class Transaction:
 class Block:
     # transactions = []
 
-    def __init__(self, previous_hash, transactions=None):
-        self.transactions = transactions
-        self.previous_hash = previous_hash
+    def __init__(self, user_id, transactions=None):
+        if transactions is None:
+            self.transactions = []
+        else:
+            self.transactions = transactions
+        self.previous_block_hash = None
         # nonce starts at 0 and is incremented until it meets certain difficulty level, determined by cryptocurrency protocol
-        self.nonce = 0
+        # self.nonce = 0
         self.hash = self.generate_hash()
+        self.user_id = user_id
 
     # not sure yet if I need this str implementation
     # def __str__(self):
-    #     return f"Block Hash: {self.hash}\nTransactions: {len(self.transactions)}\nPrevious Hash: {self.previous_hash}\n"
+    #     return f"Block Hash: {self.hash}\nTransactions: {len(self.transactions)}\nPrevious Hash: {self.previous_block_hash}\n"
 
     def generate_hash(self):
         block_contents = (
-            str(self.transactions) + str(self.previous_hash) + str(self.nonce)
+            str(self.transactions) + str(self.previous_block_hash) + str(self.nonce)
         )
         # SHA-256 hashing algorithm: cryptographic hash function
         # encode method is used to convert from Unicode to bytes, hexdigest() method is called to return str of hexadecimal digits
@@ -35,22 +40,33 @@ class Block:
         self.transactions.append(transaction)
         self.hash = self.generate_hash()
 
-    def previous_block_hash(self):
-        return self.previous_block_hash
+    # def previous_block_hash(self):
+    #     return self.previous_block_hash
 
 
 class Ledger:
     def __init__(self):
-        pass
+        self._hashmap = HashMap()
 
-    # def has_funds(self, user, amount):
-    #     if user not in self._hashmap:
-    #         return False
-    #     balance = self._hashmap.get(user)
-    #     return balance >= amount
+    def __repr__(self):
+        return f"Ledger: {self._hashmap}"
+
+    def has_funds(self, user, amount):
+        if user not in self._hashmap:
+            return False
+        balance = self._hashmap.get(user)
+        return balance >= amount
 
     def deposit(self, user, amount):
-        pass
+        self._hashmap.put(user, amount)
+
+    def transfer(self, user, amount):
+        if self.has_funds(user, amount):
+            self._hashmap.put(user, -amount)
+            # self._hashmap.put(user, self._hashmap.get(user) - amount)
+            # self._hashmap.put(self._ROOT_BC_USER, self._hashmap.get(self._ROOT_BC_USER) + amount)
+        else:
+            raise Exception("Insufficient funds")
 
 
 class Blockchain:
@@ -98,7 +114,63 @@ class Blockchain:
         self.add_block(block)
 
     # TODO - add the rest of the code for the class here
+    def add_block(self, block):
+        users_give = {}
+        users_get = {}
+        for transaction in block.transactions:
+
+            if transaction.from_user in users_give:
+                update_total = (
+                    users_give.get(transaction.from_user) + transaction.amount
+                )
+                users_get.update({transaction.from_user: update_total})
+            else:
+                users_give.update({transaction.from_user: transaction.amount})
+
+            if transaction.to_user in users_get:
+                update_total = users_get.get(transaction.to_user) + transaction.amount
+                users_get.update({transaction.to_user: update_total})
+            else:
+                users_get.update({transaction.to_user: transaction.amount})
+
+        for key in users_give.keys():
+            if self._bc_ledger.has_funds(key, users_give.get(key)) == False:
+                return False
+
+        for key in users_give.keys():
+            self._bc_ledger.transfer(key, users_give.get(key))
+
+        for key in users_get.keys():
+            self._bc_ledger.deposit(key, users_get.get(key))
+
+        previous_hash = self._blockchain[-1].hash
+        block.previous_block_hash = previous_hash
+        self._blockchain.append(block)
+
+        return True
+
+        # for key in users_give.keys():
+        #     self._bc_ledger.transfer(key, users_give.get(key))
+        # return True
+
+    def validate_chain(self):
+        pass
 
 
+# if __name__ == "__main__":
+#     block1 = Block(Transaction())  # big and lots of data
 if __name__ == "__main__":
-    block1 = Block(Transaction())  # big and lots of data
+    b = Block("name")
+    print(b.hash)
+    print(b.hash)
+    print(hash(b))
+    print(b.transactions)
+    t = Transaction(1, 2, 1000)
+    b.add_transaction(t)
+    print(b.hash)
+    print(b.transactions)
+    new_transaction = Transaction("Richard", "Calista", 2)
+    b.add_transaction(new_transaction)
+    print(b.hash)
+    print(b.hash)
+    print(b.transactions)
