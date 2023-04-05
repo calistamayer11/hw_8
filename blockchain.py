@@ -9,7 +9,7 @@ class Transaction:
 
 
 class Block:
-    transactions = []
+    # transactions = []
 
     def __init__(self, previous_hash, transactions=None):
         self.transactions = transactions
@@ -36,7 +36,7 @@ class Block:
         self.hash = self.generate_hash()
 
     def previous_block_hash(self):
-        return self.previous_hash
+        return self.previous_block_hash
 
 
 class Ledger:
@@ -98,3 +98,7 @@ class Blockchain:
         self.add_block(block)
 
     # TODO - add the rest of the code for the class here
+
+
+if __name__ == "__main__":
+    block1 = Block(Transaction())  # big and lots of data
