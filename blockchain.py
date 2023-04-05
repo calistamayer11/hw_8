@@ -19,8 +19,8 @@ class Block:
         self.hash = self.generate_hash()
 
     # not sure yet if I need this str implementation
-    def __str__(self):
-        return f"Block Hash: {self.hash}\nTransactions: {len(self.transactions)}\nPrevious Hash: {self.previous_hash}\n"
+    # def __str__(self):
+    #     return f"Block Hash: {self.hash}\nTransactions: {len(self.transactions)}\nPrevious Hash: {self.previous_hash}\n"
 
     def generate_hash(self):
         block_contents = (
