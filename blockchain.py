@@ -19,13 +19,9 @@ class Block:
             self.transactions = transactions
         self.previous_block_hash = None
         # nonce starts at 0 and is incremented until it meets certain difficulty level, determined by cryptocurrency protocol
-        # self.nonce = 0
+        self.nonce = 0
         self.hash = self.generate_hash()
         self.user_id = user_id
-
-    # not sure yet if I need this str implementation
-    # def __str__(self):
-    #     return f"Block Hash: {self.hash}\nTransactions: {len(self.transactions)}\nPrevious Hash: {self.previous_block_hash}\n"
 
     def generate_hash(self):
         block_contents = (
@@ -40,9 +36,6 @@ class Block:
         self.transactions.append(transaction)
         self.hash = self.generate_hash()
 
-    # def previous_block_hash(self):
-    #     return self.previous_block_hash
-
 
 class Ledger:
     def __init__(self):
@@ -52,15 +45,18 @@ class Ledger:
         return f"Ledger: {self._hashmap}"
 
     def has_funds(self, user, amount):
+        """checks if user has enough funds to make transaction"""
         if user not in self._hashmap:
             return False
         balance = self._hashmap.get(user)
         return balance >= amount
 
     def deposit(self, user, amount):
+        """deposits amount to user's account"""
         self._hashmap.put(user, amount)
 
     def transfer(self, user, amount):
+        """transfers amount from one user to another"""
         if self.has_funds(user, amount):
             self._hashmap.put(user, -amount)
             # self._hashmap.put(user, self._hashmap.get(user) - amount)
@@ -115,6 +111,7 @@ class Blockchain:
 
     # TODO - add the rest of the code for the class here
     def add_block(self, block):
+        """adds a block to the chain"""
         users_give = {}
         users_get = {}
         for transaction in block.transactions:
@@ -154,23 +151,14 @@ class Blockchain:
         # return True
 
     def validate_chain(self):
-        pass
-
-
-# if __name__ == "__main__":
-#     block1 = Block(Transaction())  # big and lots of data
-if __name__ == "__main__":
-    b = Block("name")
-    print(b.hash)
-    print(b.hash)
-    print(hash(b))
-    print(b.transactions)
-    t = Transaction(1, 2, 1000)
-    b.add_transaction(t)
-    print(b.hash)
-    print(b.transactions)
-    new_transaction = Transaction("Richard", "Calista", 2)
-    b.add_transaction(new_transaction)
-    print(b.hash)
-    print(b.hash)
-    print(b.transactions)
+        """Validates whether a block has been tampered with."""
+        tampered_block = []
+        for i, block in enumerate(self._blockchain):
+            if i == 0:
+                continue
+            previous_block = self._blockchain[i - 1]
+            if previous_block.previous_block_hash != self._calculate_block_hash(
+                previous_block
+            ):
+                tampered_block.append(block)
+        return tampered_block
